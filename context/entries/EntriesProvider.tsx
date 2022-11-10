@@ -1,7 +1,6 @@
 import { useEffect, useReducer } from 'react';
 import { Entry } from '../../interfaces';
 import { EntriesContext, entriesReducer } from './';
-import { v4 as uuidv4 } from 'uuid';
 import { entriesApi } from '../../apis';
 
 export interface EntriesState {
@@ -21,18 +20,26 @@ export const EntriesProvider = ({ children }: Props) => {
 
     const [state, dispatch] = useReducer(entriesReducer, Entries_INITIAL_STATE)
 
-    const addEntry = (description: string) => {
-        const payload: Entry = {
-            _id: uuidv4(),
-            description,
-            createdAt: Date.now(),
-            status: 'pending'
-        }
+    const addEntry = async (description: string) => {
+
+        const { data: payload } = await entriesApi.post<Entry>('/entries', { description })
 
         dispatch({ type: 'Entries - Add entry', payload })
     }
 
-    const updateEntry = (payload: Entry) => dispatch({ type: 'Entries - Update Entry', payload })
+    const updateEntry = async (entry: Entry) => {
+        try {
+            const { data: payload } = await entriesApi.put<Entry>(`/entries/${entry._id}`, {
+                description: entry.description,
+                status: entry.status
+            })
+
+            dispatch({ type: 'Entries - Update Entry', payload })
+        } catch (error) {
+            console.log({error})
+        }
+
+    }
 
     const refreshEntries = async () => {
         const { data: payload } = await entriesApi.get<Entry[]>('/entries')

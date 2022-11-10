@@ -6,7 +6,10 @@ export interface IEntry extends Entry { }
 
 const entrySchema = new Schema({
     description: { type: String, required: true },
-    createdAt: { type: Number },
+    createdAt: { 
+        type: Number,
+        default: Date.now()
+     },
     status: {
         type: String,
         enum: {
@@ -15,8 +18,8 @@ const entrySchema = new Schema({
                 'in-progress',
                 'finished'
             ],
-            message: '{VALUE} no es un estado permitido'
-        }
+        },
+        default: 'pending',
     }
 })
 
